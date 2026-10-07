@@ -1,642 +1,205 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HTML & CSS Quiz — 10 Questions</title>
-  <style>
-    :root{
-      --bg:#0f1724; --card:#0b1220; --accent:#3b82f6; --muted:#94a3b8; --success:#10b981; --danger:#ef4444;
-      --glass: rgba(255,255,255,0.03);
-      --radius:12px;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh; background:
-      linear-gradient(180deg, rgba(59,130,246,0.06), rgba(0,0,0,0)) , 
-      radial-gradient(circle at 10% 10%, rgba(59,130,246,0.06), transparent 10%),
-      var(--bg);
-      color:#e6eef6; display:flex; align-items:center; justify-content:center; padding:24px;
-    }
-    .app {
-      width:100%; max-width:920px; background:linear-gradient(180deg,var(--card),rgba(4,6,10,0.7));
-      border-radius:16px; padding:22px; box-shadow:0 10px 30px rgba(2,6,23,0.7);
-      backdrop-filter: blur(6px);
-      position:relative;
-    }
-
-    header{display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:10px}
-    .title{display:flex; gap:12px; align-items:center}
-    .logo{width:56px; height:56px; border-radius:12px; background:linear-gradient(135deg,var(--accent),#7c3aed); display:flex; align-items:center; justify-content:center; font-weight:700}
-    .title h1{font-size:18px;margin:0}
-    .title p{margin:0; color:var(--muted); font-size:13px}
-
-    .meta{display:flex; gap:12px; align-items:center}
-    .timer {
-      display:flex; gap:10px; align-items:center; background:var(--glass); padding:8px 12px; border-radius:10px;
-      font-weight:600; color:var(--accent); min-width:140px; justify-content:center;
-    }
-    .controls{display:flex; gap:8px}
-    .btn{
-      border:0; padding:8px 12px; border-radius:10px; background:rgba(255,255,255,0.04); color:inherit; cursor:pointer;
-      font-weight:600;
-    }
-    .btn.primary{background:var(--accent); color:#051125}
-    .btn.ghost{background:transparent; border:1px solid rgba(255,255,255,0.04)}
-    .content{display:grid; grid-template-columns:1fr 320px; gap:18px; margin-top:16px}
-    @media (max-width:880px){ .content{grid-template-columns:1fr} .meta{flex-wrap:wrap} }
-
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding:18px; border-radius:12px}
-    .question-area{min-height:220px; display:flex; flex-direction:column; gap:12px}
-    .q-head{display:flex; justify-content:space-between; align-items:center}
-    .q-count{color:var(--muted); font-size:13px}
-    .q-text{font-size:18px; line-height:1.3}
-    .options{display:flex; flex-direction:column; gap:10px; margin-top:6px}
-    .option{
-      display:flex; align-items:center; gap:12px; padding:10px; border-radius:10px; cursor:pointer;
-      background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02);
-    }
-    .option input{appearance:none; width:18px; height:18px; border-radius:6px; border:2px solid var(--muted); display:inline-block; position:relative}
-    .option input:checked{background:var(--accent); border-color:var(--accent)}
-    .option label{cursor:pointer; user-select:none}
-
-    .nav { display:flex; gap:8px; justify-content:space-between; align-items:center; margin-top:12px }
-    .progress{height:10px; background:rgba(255,255,255,0.04); border-radius:999px; overflow:hidden; flex:1}
-    .progress > i{display:block; height:100%; background:linear-gradient(90deg,var(--accent),#60a5fa); width:0%; transition:width .3s ease}
-
-    /* sidebar */
-    .sidebar .summary{display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:12px}
-    .q-list{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
-    @media (max-width:680px){ .q-list{grid-template-columns:repeat(5,1fr)} }
-    .q-pill{padding:8px 10px; border-radius:8px; text-align:center; font-weight:700; cursor:pointer; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02)}
-    .q-pill.answered{background:linear-gradient(90deg,var(--accent),#60a5fa); color:#051125}
-    .q-pill.current{outline:3px solid rgba(99,102,241,0.12); box-shadow:0 6px 18px rgba(59,130,246,0.08)}
-    .results{display:none; padding:12px; margin-top:10px; border-radius:10px}
-
-    /* results */
-    .result-card{display:flex; gap:12px; align-items:center; justify-content:space-between}
-    .score{font-size:28px; font-weight:800}
-    .qa {margin-top:12px; display:flex; flex-direction:column; gap:12px}
-    .qa .one{background:rgba(255,255,255,0.02); padding:12px; border-radius:10px}
-    .correct{color:var(--success); font-weight:700}
-    .wrong{color:var(--danger); font-weight:700}
-
-    footer.small{margin-top:12px; color:var(--muted); font-size:13px; text-align:center}
-
-    /* start overlay */
-    .overlay {
-      position:absolute; inset:0; background:linear-gradient(180deg, rgba(2,6,23,0.85), rgba(2,6,23,0.85));
-      border-radius:16px; display:flex; align-items:center; justify-content:center; z-index:30;
-    }
-    .start-card{width:100%; max-width:520px; background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding:22px; border-radius:12px; text-align:center}
-    .start-card h2{margin:0 0 8px 0}
-    .start-card p{color:var(--muted); margin:0 0 16px 0}
-    .start-input{display:flex; gap:8px; justify-content:center; margin-bottom:12px}
-    .start-input input{padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:inherit; min-width:220px}
-    .muted{color:var(--muted); font-size:13px}
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuizApp</title>
+  <meta name="description" content="An interactive quiz platform with categories, difficulty levels, timed questions, streaks, lifelines and answer review.">
+  <meta name="theme-color" content="#0f1729">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%234f6bff'/%3E%3Ctext x='32' y='44' font-size='36' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'%3EQ%3C/text%3E%3C/svg%3E">
+  <script>
+    /* Apply the saved theme before first paint to avoid a flash. */
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('quizapp.theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') {
+        t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app" role="application" aria-labelledby="title">
-    <header>
-      <div class="title">
-        <div class="logo" aria-hidden>QZ</div>
-        <div>
-          <h1 id="title">HTML & CSS — Quiz (10 questions)</h1>
-          <p>University level MCQs covering modern HTML & CSS concepts</p>
-        </div>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <button class="brand" id="brandBtn" type="button" aria-label="QuizApp home">
+      <span class="brand-mark" aria-hidden="true">Q</span>
+      <span class="brand-name">QuizApp</span>
+    </button>
+    <button class="icon-btn" id="themeBtn" type="button" aria-pressed="false" aria-label="Switch to light theme">
+      <span id="themeIcon" aria-hidden="true">☀️</span>
+      <span id="themeText" class="icon-btn-text">Light</span>
+    </button>
+  </header>
+
+  <main id="main" class="shell">
+    <noscript><p class="card">QuizApp needs JavaScript to run.</p></noscript>
+
+    <!-- ============ SETUP ============ -->
+    <section id="screen-setup" class="screen" aria-labelledby="setupTitle">
+      <div class="card setup-card">
+        <h1 id="setupTitle" tabindex="-1">Quiz Master</h1>
+        <p class="lead">Choose a topic, set the pace, and test yourself.</p>
+
+        <form id="setupForm" class="form" novalidate>
+          <div class="field">
+            <label for="categorySelect">Category</label>
+            <select id="categorySelect"></select>
+          </div>
+          <div class="field">
+            <label for="difficultySelect">Difficulty</label>
+            <select id="difficultySelect"></select>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="countSelect">Questions</label>
+              <select id="countSelect"></select>
+            </div>
+            <div class="field">
+              <label for="timeSelect">Time per question</label>
+              <select id="timeSelect"></select>
+            </div>
+          </div>
+          <p class="hint-text" id="availableNote" aria-live="polite"></p>
+          <button class="btn btn-primary btn-lg" id="startBtn" type="submit">Start quiz</button>
+        </form>
+
+        <details class="rules">
+          <summary>How scoring works</summary>
+          <ul>
+            <li>Correct answers: <strong>10 / 20 / 30</strong> points for Easy / Medium / Hard.</li>
+            <li>Each correct answer in a row adds <strong>+2</strong> bonus points (up to +10).</li>
+            <li>Wrong answers and timeouts score nothing and reset your streak.</li>
+            <li>Lifelines (one 50/50 and one hint per quiz) are free to use.</li>
+          </ul>
+        </details>
       </div>
 
-      <div class="meta">
-        <div class="timer" aria-live="polite">
-          <div id="timeDisplay">03:00</div>
-          <div class="small-note">Remaining</div>
+      <div class="card stats-card" aria-labelledby="statsTitle">
+        <div class="card-head">
+          <h2 id="statsTitle">Your statistics</h2>
+          <button class="btn btn-ghost btn-sm" id="resetStatsBtn" type="button">Reset</button>
         </div>
-        <div class="controls">
-          <button class="btn ghost" id="restartBtn" title="Restart quiz">Restart</button>
-          <button class="btn primary" id="submitBtn" title="Submit quiz">Submit</button>
+        <p class="hint-text" id="statsEmpty">Finish a quiz and your progress shows up here. It is saved only in this browser.</p>
+        <div id="statsBody" hidden>
+          <dl class="stat-grid" id="statGrid"></dl>
+          <h3 class="subhead">Accuracy by category</h3>
+          <ul class="bars" id="categoryBars"></ul>
         </div>
       </div>
-    </header>
-
-    <section class="content" id="mainContent">
-      <main class="card" aria-live="polite">
-        <div class="question-area">
-          <div class="q-head">
-            <div class="q-count" id="qCount">Question 1 of 10</div>
-            <div class="q-difficulty" id="qDiff" style="color:var(--muted)">HTML & CSS</div>
-          </div>
-
-          <div class="q-text" id="qText">Loading...</div>
-
-          <form id="optionsForm" class="options" aria-labelledby="qText"></form>
-
-          <div class="nav">
-            <div style="display:flex;gap:8px">
-              <button class="btn" id="prevBtn" aria-label="Previous question">Prev</button>
-              <button class="btn" id="nextBtn" aria-label="Next question">Next</button>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;flex:1;">
-              <div class="progress" aria-hidden><i id="progressFill"></i></div>
-              <div style="min-width:48px;text-align:right;color:var(--muted);font-weight:700" id="progressText">0/10</div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <aside class="sidebar card" aria-label="Quiz sidebar">
-        <div class="summary">
-          <div style="font-weight:800">Quick jump</div>
-          <div style="color:var(--muted);font-size:13px">Click question to jump</div>
-        </div>
-
-        <div class="q-list" id="qList" aria-hidden></div>
-
-        <div style="margin-top:12px; display:flex; gap:8px;">
-          <button class="btn ghost" id="showAnswersBtn">Show answers</button>
-          <button class="btn" id="copyScoreBtn" title="Copy score to clipboard">Copy Score</button>
-        </div>
-
-        <div class="results card" id="resultsCard" aria-hidden="true">
-          <div class="result-card">
-            <div>
-              <div style="color:var(--muted)" id="resultLabel">Result</div>
-              <div class="score" id="finalScore">0 / 10</div>
-              <div class="muted" id="finalName" style="margin-top:6px"></div>
-            </div>
-            <div style="text-align:right">
-              <div id="percentText" style="font-weight:800">0%</div>
-              <div style="color:var(--muted);font-size:13px">Completed</div>
-            </div>
-          </div>
-
-          <div class="qa" id="qaList"></div>
-        </div>
-
-      </aside>
     </section>
 
-    <footer class="small">Tip: Use keyboard to navigate. Save this file as <code>quiz.html</code> and open in a browser to run.</footer>
-
-    <!-- Start overlay asking name -->
-    <div class="overlay" id="startOverlay" role="dialog" aria-modal="true">
-      <div class="start-card">
-        <h2>Welcome!</h2>
-        <p class="muted">Enter your name to start the HTML & CSS quiz. The timer starts when you click Start.</p>
-        <div class="start-input">
-          <input id="nameInput" type="text" placeholder="Your name (e.g. Shriya)" aria-label="Enter your name" />
-          <button class="btn primary" id="startBtn">Start</button>
+    <!-- ============ QUIZ ============ -->
+    <section id="screen-quiz" class="screen" aria-labelledby="questionText" hidden>
+      <div class="card quiz-card">
+        <div class="quiz-top">
+          <p class="q-count" id="qCount">Question 1 / 10</p>
+          <div class="chips">
+            <span class="chip chip-score" title="Score">⭐ <span id="scoreValue">0</span> pts</span>
+            <span class="chip chip-streak" id="streakChip" title="Current streak">🔥 <span id="streakValue">0</span> streak</span>
+          </div>
         </div>
-        <div class="muted">You can use arrow keys to navigate and Ctrl/Cmd+Enter to submit.</div>
+
+        <div class="progress" id="progressBar" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="meta-row">
+          <span class="tag" id="qCategory"></span>
+          <span class="tag tag-diff" id="qDifficulty"></span>
+          <div class="timer" id="timer" role="timer" aria-label="Time remaining">
+            <span aria-hidden="true">⏱</span>
+            <span id="timerValue">20</span><span class="sr-only"> seconds remaining</span>
+          </div>
+        </div>
+        <div class="timer-track" aria-hidden="true"><div class="timer-fill" id="timerFill"></div></div>
+        <p class="sr-only" id="timerAnnounce" aria-live="assertive"></p>
+
+        <h2 class="question" id="questionText" tabindex="-1"></h2>
+
+        <div class="options" id="options" role="group" aria-labelledby="questionText"></div>
+
+        <div class="hint-box" id="hintBox" hidden>
+          <strong>💡 Hint:</strong> <span id="hintText"></span>
+        </div>
+
+        <div class="feedback" id="feedback" role="status" aria-live="polite" hidden>
+          <p class="feedback-title" id="feedbackTitle"></p>
+          <p class="feedback-body" id="feedbackBody"></p>
+        </div>
+
+        <div class="quiz-actions">
+          <div class="lifelines">
+            <button class="btn btn-lifeline" id="fiftyBtn" type="button">50/50 <span class="uses" id="fiftyUses">×1</span></button>
+            <button class="btn btn-lifeline" id="hintBtn" type="button">💡 Hint <span class="uses" id="hintUses">×1</span></button>
+          </div>
+          <button class="btn btn-primary" id="nextBtn" type="button" hidden>Next →</button>
+        </div>
+
+        <div class="quiz-footer">
+          <button class="btn btn-ghost btn-sm" id="restartBtn" type="button">Restart</button>
+          <button class="btn btn-ghost btn-sm" id="quitBtn" type="button">Quit quiz</button>
+        </div>
+        <p class="kbd-hint">Tip: press <kbd>1</kbd>–<kbd>4</kbd> to answer and <kbd>Enter</kbd> for next.</p>
       </div>
-    </div>
+    </section>
 
-  </div>
+    <!-- ============ RESULTS ============ -->
+    <section id="screen-results" class="screen" aria-labelledby="resultsTitle" hidden>
+      <div class="card results-card">
+        <h2 id="resultsTitle" tabindex="-1">🎉 Quiz complete!</h2>
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="ring-text">
+            <span class="ring-score" id="resultScore">0 / 0</span>
+            <span class="ring-pct" id="resultPct">0%</span>
+          </div>
+        </div>
+        <p class="result-message" id="resultMessage"></p>
+        <p class="record-note" id="recordNote" hidden></p>
 
-<script>
-/* Updated Quiz app
-   - Fixes: use textContent for options to prevent HTML parsing of tags like <nav>
-   - Added start overlay: asks for name before starting and before timer begins
-   - Final result shows name and "Name — X out of 10 (Y%)"
-*/
+        <dl class="result-grid" id="resultGrid"></dl>
 
-const QUESTIONS = [
-  {
-    q: "Which HTML element is semantically correct to wrap the main navigation links of a page?",
-    options: ["<nav>", "<menu>", "<navigation>", "<links>"],
-    a: 0,
-    explain: "The <nav> element is the semantic element for navigation links."
-  },
-  {
-    q: "Which property creates a new stacking context without a z-index?",
-    options: ["position: relative", "transform: translateZ(0)", "opacity: 0.9999", "display: block"],
-    a: 1,
-    explain: "transform (and some other properties) create a new stacking context."
-  },
-  {
-    q: "What is the effect of the CSS property 'box-sizing: border-box'?",
-    options: [
-      "Padding and border are included within element width/height",
-      "Padding is excluded from width but border is included",
-      "Only border is included in width",
-      "It resets all default browser margins"
-    ],
-    a: 0,
-    explain: "border-box causes width/height to include padding and border."
-  },
-  {
-    q: "Which input type provides semantic validation for email addresses in modern browsers?",
-    options: ["text", "email", "mail", "address"],
-    a: 1,
-    explain: "type='email' triggers email validation and shows optimized keyboard on mobile."
-  },
-  {
-    q: "Which of these selectors selects an element with class 'btn' that is a direct child of a div?",
-    options: ["div .btn", "div > .btn", ".btn > div", "div .btn:first-child"],
-    a: 1,
-    explain: "The '>' combinator selects direct children only."
-  },
-  {
-    q: "Which HTML attribute should be used to make an image accessible to screen readers when the image conveys information?",
-    options: ["role", "title", "alt", "aria-label"],
-    a: 2,
-    explain: "alt provides alternative text describing the image content."
-  },
-  {
-    q: "In CSS Grid, how do you make the first column fixed 200px and the second column take the remaining space?",
-    options: ["grid-template-columns: 200px 1fr;", "grid-template-columns: 200px auto;", "grid-template-columns: 1fr 200px;", "grid-template-columns: repeat(2, 1fr);"],
-    a: 0,
-    explain: "200px then 1fr makes first fixed and second fluid."
-  },
-  {
-    q: "Which meta tag helps ensure the page uses responsive scaling on mobile devices?",
-    options: [
-      "<meta name='viewport' content='width=device-width, initial-scale=1'>",
-      "<meta name='mobile' content='yes'>",
-      "<meta charset='utf-8'>",
-      "<meta http-equiv='X-UA-Compatible' content='IE=edge'>"
-    ],
-    a: 0,
-    explain: "The viewport meta tells the browser how to scale the page on mobile."
-  },
-  {
-    q: "What does the CSS property 'contain: layout;' do?",
-    options: [
-      "Isolates layout so changes inside don't affect outside layout calculations",
-      "Prevents any painting of the element",
-      "Makes the element a fixed-position container",
-      "Forces hardware acceleration"
-    ],
-    a: 0,
-    explain: "contain: layout isolates layout to help performance."
-  },
-  {
-    q: "Which ARIA role is appropriate for an application-like region of the page to provide screen reader users with a landmark?",
-    options: ["role='region'", "role='application'", "role='main'", "role='dialog'"],
-    a: 2,
-    explain: "role='main' identifies the main content landmark; 'application' changes AT behavior and should be used carefully."
-  }
-];
+        <div class="btn-row">
+          <button class="btn btn-primary" id="reviewBtn" type="button">Review answers</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="playAgainBtn" type="button">Play again</button>
+          <button class="btn" id="homeBtn" type="button">Home</button>
+        </div>
+      </div>
+    </section>
 
-// state
-let current = 0;
-let answers = new Array(QUESTIONS.length).fill(null);
-let totalTime = 180; // seconds
-let timeLeft = totalTime;
-let timerInterval = null;
-let quizSubmitted = false;
-let participantName = ''; // will be set at start
+    <!-- ============ REVIEW ============ -->
+    <section id="screen-review" class="screen" aria-labelledby="reviewTitle" hidden>
+      <div class="card review-card">
+        <div class="card-head">
+          <h2 id="reviewTitle" tabindex="-1">Review answers</h2>
+          <label class="check"><input type="checkbox" id="mistakesOnly"> Mistakes only</label>
+        </div>
+        <ol class="review-list" id="reviewList"></ol>
+        <p class="hint-text" id="reviewEmpty" hidden>Nothing to show: you got everything right! 🎉</p>
+        <div class="btn-row">
+          <button class="btn" id="backToResultsBtn" type="button">← Back to results</button>
+          <button class="btn btn-primary" id="reviewPlayAgainBtn" type="button">Play again</button>
+          <button class="btn" id="reviewHomeBtn" type="button">Home</button>
+        </div>
+      </div>
+    </section>
+  </main>
 
-const els = {
-  qCount: document.getElementById('qCount'),
-  qText: document.getElementById('qText'),
-  optionsForm: document.getElementById('optionsForm'),
-  prevBtn: document.getElementById('prevBtn'),
-  nextBtn: document.getElementById('nextBtn'),
-  qList: document.getElementById('qList'),
-  progressFill: document.getElementById('progressFill'),
-  progressText: document.getElementById('progressText'),
-  timeDisplay: document.getElementById('timeDisplay'),
-  restartBtn: document.getElementById('restartBtn'),
-  submitBtn: document.getElementById('submitBtn'),
-  resultsCard: document.getElementById('resultsCard'),
-  finalScore: document.getElementById('finalScore'),
-  percentText: document.getElementById('percentText'),
-  qaList: document.getElementById('qaList'),
-  showAnswersBtn: document.getElementById('showAnswersBtn'),
-  copyScoreBtn: document.getElementById('copyScoreBtn'),
-  startOverlay: document.getElementById('startOverlay'),
-  startBtn: document.getElementById('startBtn'),
-  nameInput: document.getElementById('nameInput'),
-  finalName: document.getElementById('finalName'),
-  resultLabel: document.getElementById('resultLabel')
-};
+  <footer class="footer">
+    <p>QuizApp · MIT licensed · <a href="https://github.com/ShriyaP1966/QuizApp" rel="noopener">Source on GitHub</a></p>
+  </footer>
 
-// initialize question list pills
-function initQList(){
-  els.qList.innerHTML = '';
-  for(let i=0;i<QUESTIONS.length;i++){
-    const btn = document.createElement('button');
-    btn.className = 'q-pill';
-    btn.textContent = i+1;
-    btn.addEventListener('click', ()=>{ goTo(i); });
-    btn.setAttribute('aria-label', 'Jump to question '+(i+1));
-    els.qList.appendChild(btn);
-  }
-}
-
-// render a question — uses textContent for safety (prevents tags being parsed)
-function renderQuestion(){
-  const q = QUESTIONS[current];
-  els.qCount.textContent = `Question ${current+1} of ${QUESTIONS.length}`;
-  // Use textContent to avoid parsing angle-bracket markup inside options or text
-  els.qText.textContent = q.q;
-
-  // build options
-  els.optionsForm.innerHTML = '';
-  q.options.forEach((opt, idx) => {
-    const id = `opt-${current}-${idx}`;
-    const wrapper = document.createElement('label');
-    wrapper.className = 'option';
-    wrapper.setAttribute('for', id);
-
-    const input = document.createElement('input');
-    input.type = 'radio';
-    input.name = 'answer';
-    input.id = id;
-    input.value = idx;
-    if (answers[current] === idx) input.checked = true;
-
-    const span = document.createElement('span');
-    // use textContent so strings like "<nav>" render literally
-    span.textContent = opt;
-
-    // listen for change
-    input.addEventListener('change', (e) => {
-      answers[current] = parseInt(e.target.value,10);
-      updatePills();
-      updateProgress();
-    });
-
-    wrapper.appendChild(input);
-    wrapper.appendChild(span);
-    els.optionsForm.appendChild(wrapper);
-  });
-
-  updateNavButtons();
-  updatePills();
-  updateProgress();
-  focusFirstOption();
-}
-
-// focus first option (keyboard)
-function focusFirstOption(){
-  const first = els.optionsForm.querySelector('input');
-  if(first) first.focus();
-}
-
-function updateNavButtons(){
-  els.prevBtn.disabled = (current===0 || quizSubmitted);
-  els.nextBtn.disabled = (current===QUESTIONS.length-1 || quizSubmitted);
-}
-
-function updatePills(){
-  const pills = els.qList.children;
-  for(let i=0;i<pills.length;i++){
-    pills[i].classList.remove('answered','current');
-    if(answers[i] !== null) pills[i].classList.add('answered');
-    if(i === current) pills[i].classList.add('current');
-  }
-}
-
-function updateProgress(){
-  const answered = answers.filter(x => x !== null).length;
-  const pct = Math.round((answered/QUESTIONS.length)*100);
-  els.progressFill.style.width = `${pct}%`;
-  els.progressText.textContent = `${answered}/${QUESTIONS.length}`;
-}
-
-// navigation
-function goTo(index){
-  if(index < 0 || index >= QUESTIONS.length) return;
-  current = index;
-  renderQuestion();
-}
-
-function next(){
-  if(current < QUESTIONS.length - 1) {
-    current++;
-    renderQuestion();
-  }
-}
-
-function prev(){
-  if(current > 0) {
-    current--;
-    renderQuestion();
-  }
-}
-
-// timer
-function startTimer(){
-  if(timerInterval) clearInterval(timerInterval);
-  updateTimeDisplay();
-  timerInterval = setInterval(()=>{
-    timeLeft--;
-    if(timeLeft <= 0){
-      clearInterval(timerInterval);
-      timeLeft = 0;
-      updateTimeDisplay();
-      autoSubmit();
-    } else {
-      updateTimeDisplay();
-    }
-  }, 1000);
-}
-
-function updateTimeDisplay(){
-  const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
-  const s = (timeLeft % 60).toString().padStart(2,'0');
-  els.timeDisplay.textContent = `${m}:${s}`;
-  // visual urgency
-  if(timeLeft <= 15){
-    els.timeDisplay.style.color = 'var(--danger)';
-  } else if(timeLeft <= 45){
-    els.timeDisplay.style.color = '#f59e0b';
-  } else {
-    els.timeDisplay.style.color = 'var(--accent)';
-  }
-}
-
-function autoSubmit(){
-  if(!quizSubmitted) submitQuiz(true);
-}
-
-// submit (manual or auto)
-function submitQuiz(isAuto=false){
-  quizSubmitted = true;
-  if(timerInterval) clearInterval(timerInterval);
-  // compute score
-  let score = 0;
-  for(let i=0;i<QUESTIONS.length;i++){
-    if(answers[i] === QUESTIONS[i].a) score++;
-  }
-  // show results area
-  els.resultsCard.style.display = 'block';
-  els.finalScore.textContent = `${score} / ${QUESTIONS.length}`;
-  const pct = Math.round((score/QUESTIONS.length)*100);
-  els.percentText.textContent = `${pct}%`;
-
-  // show personal label "Name — X out of 10 (Y%)"
-  const displayName = participantName ? participantName.trim() : 'Participant';
-  els.finalName.textContent = `${displayName} — ${score} out of ${QUESTIONS.length} (${pct}%)`;
-  els.resultLabel.textContent = 'Final score';
-
-  // build QA list
-  els.qaList.innerHTML = '';
-  for(let i=0;i<QUESTIONS.length;i++){
-    const q = QUESTIONS[i];
-    const user = answers[i];
-    const correct = q.a;
-    const div = document.createElement('div');
-    div.className = 'one';
-    const isCorrect = user === correct;
-    const userText = user===null ? '<em>Not answered</em>' : q.options[user];
-    const correctText = q.options[correct];
-
-    // use textContent for safety when inserting node children
-    const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.gap = '12px';
-    header.style.alignItems = 'center';
-    const left = document.createElement('div');
-    left.style.fontWeight = '700';
-    left.textContent = `Q${i+1}. ${q.q}`;
-    const right = document.createElement('div');
-    right.className = isCorrect ? 'correct' : 'wrong';
-    right.textContent = isCorrect ? 'Correct' : 'Wrong';
-    header.appendChild(left);
-    header.appendChild(right);
-
-    const your = document.createElement('div');
-    your.style.marginTop = '6px';
-    const yourStrong = document.createElement('strong');
-    yourStrong.textContent = 'Your: ';
-    your.appendChild(yourStrong);
-    const yourSpan = document.createElement('span');
-    yourSpan.textContent = (user===null ? 'Not answered' : q.options[user]);
-    your.appendChild(yourSpan);
-
-    const corr = document.createElement('div');
-    corr.style.marginTop = '6px';
-    const corrStrong = document.createElement('strong');
-    corrStrong.textContent = 'Correct: ';
-    corr.appendChild(corrStrong);
-    const corrSpan = document.createElement('span');
-    corrSpan.textContent = correctText;
-    corr.appendChild(corrSpan);
-
-    const expl = document.createElement('div');
-    expl.style.marginTop = '6px';
-    expl.style.color = 'var(--muted)';
-    expl.textContent = q.explain || '';
-
-    div.appendChild(header);
-    div.appendChild(your);
-    div.appendChild(corr);
-    div.appendChild(expl);
-
-    els.qaList.appendChild(div);
-  }
-
-  // disable interactions
-  els.prevBtn.disabled = true;
-  els.nextBtn.disabled = true;
-  Array.from(document.querySelectorAll('input[name="answer"]')).forEach(inp => inp.disabled = true);
-
-  // show a message if auto-submitted
-  if(isAuto) {
-    alert('Time is up — quiz auto-submitted.');
-  }
-}
-
-// restart
-function restart(){
-  if(!confirm('Restart the quiz? Your current answers will be cleared.')) return;
-  // reset state
-  answers = new Array(QUESTIONS.length).fill(null);
-  current = 0;
-  timeLeft = totalTime;
-  quizSubmitted = false;
-  participantName = '';
-  els.resultsCard.style.display = 'none';
-  els.finalName.textContent = '';
-  els.resultLabel.textContent = 'Result';
-  initQList();
-  renderQuestion();
-  // show overlay again
-  els.startOverlay.style.display = 'flex';
-  els.nameInput.value = '';
-  // stop timer if running
-  if(timerInterval) clearInterval(timerInterval);
-  updateTimeDisplay();
-}
-
-// show answers quickly (toggle)
-function toggleShowAnswers(){
-  const visible = els.resultsCard.style.display === 'block';
-  if(!visible){
-    // if not submitted, submit first so results show
-    if(!quizSubmitted) {
-      submitQuiz(false);
-    } else {
-      els.resultsCard.style.display = 'block';
-    }
-    window.scrollTo({top:0,behavior:'smooth'});
-  } else {
-    els.resultsCard.style.display = 'none';
-  }
-}
-
-// copy score
-function copyScore(){
-  if(!quizSubmitted){
-    alert('Please submit the quiz first to copy your score.');
-    return;
-  }
-  const scoreText = `${participantName ? participantName : 'Participant'} — ${els.finalScore.textContent} (${els.percentText.textContent})`;
-  navigator.clipboard?.writeText(scoreText).then(()=> {
-    alert('Score copied: ' + scoreText);
-  }).catch(()=> {
-    alert('Could not copy to clipboard. Score: ' + scoreText);
-  });
-}
-
-// keyboard navigation
-document.addEventListener('keydown', (e)=>{
-  // don't interfere when overlay is open and typing name
-  if (els.startOverlay.style.display !== 'none' && els.startOverlay.style.display !== '') return;
-
-  if(e.key === 'ArrowRight') next();
-  if(e.key === 'ArrowLeft') prev();
-  if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitQuiz(); // cmd/ctrl+enter to submit
-});
-
-els.nextBtn.addEventListener('click', next);
-els.prevBtn.addEventListener('click', prev);
-els.restartBtn.addEventListener('click', restart);
-els.submitBtn.addEventListener('click', ()=> submitQuiz(false));
-els.showAnswersBtn.addEventListener('click', toggleShowAnswers);
-els.copyScoreBtn.addEventListener('click', copyScore);
-
-// Start overlay handlers
-els.startBtn.addEventListener('click', startQuiz);
-els.nameInput.addEventListener('keydown', (e) => {
-  if(e.key === 'Enter') startQuiz();
-});
-
-function startQuiz(){
-  const nameVal = els.nameInput.value.trim();
-  participantName = nameVal || 'Participant';
-  // hide overlay
-  els.startOverlay.style.display = 'none';
-  // show greeting briefly (optional)
-  // start timer
-  timeLeft = totalTime;
-  startTimer();
-  // set small personalized text somewhere if needed
-  renderQuestion();
-}
-
-// initialize UI — overlay visible by default
-els.startOverlay.style.display = 'flex';
-initQList();
-renderQuestion();
-updateProgress();
-updateTimeDisplay();
-
-</script>
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ui.js"></script>
 </body>
 </html>
