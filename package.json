@@ -1,0 +1,10 @@
+{
+  "name": "quizapp",
+  "version": "1.0.0",
+  "description": "Interactive quiz platform with categories, difficulty levels, timer, streaks and lifelines.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node tests/run.js"
+  }
+}
